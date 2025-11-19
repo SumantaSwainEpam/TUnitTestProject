@@ -1,4 +1,4 @@
-# TUnit Test Project
+﻿# TUnit Test Project
 
 ## Overview
 
@@ -15,15 +15,16 @@
 
 ```
 TUnitTestProject/
-??? Data/           # Helper classes and business logic
-?   ??? BooleanHelper.cs          # Boolean utility functions
-?   ??? MyCalculator.cs         # Calculator with arithmetic operations
-?   ??? StringHelper.cs# String utility functions
-??? Tests/                  # Test suites using TUnit
-?   ??? BooleanHelperTests.cs     # Tests for BooleanHelper
-?   ??? MyCalculatorTests.cs      # Tests for MyCalculator
-?   ??? StringHelperTests.cs      # Tests for StringHelper
-??? README.md   # Project documentation
+├── Data/  # Helper classes and business logic
+│   ├── BooleanHelper.cs   # Boolean utility functions
+│   ├── MyCalculator.cs       # Calculator with arithmetic operations
+│   └── StringHelper.cs          # String utility functions
+├── Tests/    # Test suites using TUnit
+│   ├── BooleanHelperTests.cs    # Tests for BooleanHelper
+│   ├── MyCalculatorTests.cs     # Tests for MyCalculator
+│   └── StringHelperTests.cs     # Tests for StringHelper
+├── TUnitTestProject.csproj    # Project configuration file
+└── README.md  # Project documentation
 ```
 
 ## Components
@@ -135,4 +136,4 @@ This project is a demonstration/educational project.
 
 ## Author
 
-Sumanta Swain (EPAM)
+Sumanta Swain (Epam Systems)
