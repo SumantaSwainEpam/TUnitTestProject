@@ -3,10 +3,9 @@
 	<PropertyGroup>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<OutputType>Exe</OutputType>
 		<TargetFramework>net8.0</TargetFramework>
 
-		<!-- Enable New Test Runner required for TUnit -->
+		<!-- Required for TUnit -->
 		<UseMicrosoftTestingPlatform>true</UseMicrosoftTestingPlatform>
 	</PropertyGroup>
 
