@@ -24,26 +24,32 @@ jobs:
       - name: Build solution
         run: dotnet build --no-restore --configuration Release
 
+      # Run tests and capture output
       - name: Run tests
-        run: |
-          dotnet test `
-            --logger:"trx;LogFileName=test_results.trx" `
-            --results-directory:"TestResults" `
-            --filter:"FullyQualifiedName~TUnitTestProject.Tests.StringHelperTests |
-                      FullyQualifiedName~TUnitTestProject.Tests.BooleanHelperTests |
-                      FullyQualifiedName~TUnitTestProject.Tests.MyCalculatorTests"
+        run: dotnet test --filter "FullyQualifiedName~TUnitTestProject.Tests.StringHelperTests | FullyQualifiedName~TUnitTestProject.Tests.BooleanHelperTests | FullyQualifiedName~TUnitTestProject.Tests.MyCalculatorTests" `
+              | tee test_output.txt
         shell: pwsh
 
-      - name: Publish Test Summary
-        uses: dorny/test-reporter@v1
+      # Generate Custom Test Summary
+      - name: Generate Test Summary
         if: always()
-        with:
-          name: TUnit Test Results
-          path: TestResults/**/*.trx
-          reporter: dotnet-trx
+        run: |
+          $output = Get-Content test_output.txt -Raw
 
-      - name: Upload TRX Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: TestResults
+          $passed  = ([regex]::Matches($output, "Passed: (\d+)")).Groups[1].Value
+          $failed  = ([regex]::Matches($output, "Failed: (\d+)")).Groups[1].Value
+          $skipped = ([regex]::Matches($output, "Skipped: (\d+)")).Groups[1].Value
+
+          if (-not $passed)  { $passed = 0 }
+          if (-not $failed)  { $failed = 0 }
+          if (-not $skipped) { $skipped = 0 }
+
+          $total = [int]$passed + [int]$failed + [int]$skipped
+
+          Add-Content $env:GITHUB_STEP_SUMMARY "### 🧪 Test Summary"
+          Add-Content $env:GITHUB_STEP_SUMMARY "- ✅ Passed: $passed"
+          Add-Content $env:GITHUB_STEP_SUMMARY "- ❌ Failed: $failed"
+          Add-Content $env:GITHUB_STEP_SUMMARY "- ⚠️ Skipped: $skipped"
+          Add-Content $env:GITHUB_STEP_SUMMARY "- 🧩 Total: $total"
+
+        shell: pwsh
