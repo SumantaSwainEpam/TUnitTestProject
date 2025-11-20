@@ -39,11 +39,12 @@ jobs:
       # Step 6: Generate Test Summary
       - name: Publish Test Summary
         uses: dorny/test-reporter@v1
-        if: always() # ensures report is generated even on test failure
+        if: always()
         with:
           name: TUnit Test Results
-          path: TestResults/test_results.trx
+          path: TestResults/**/*.trx
           reporter: dotnet-trx
+
 
       # Step 7: Upload TRX file for download
       - name: Upload TRX Report
