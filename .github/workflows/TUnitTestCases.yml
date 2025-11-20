@@ -31,9 +31,9 @@ jobs:
       # Step 5: Run tests
       - name: Run tests
         run: dotnet test \
-              --logger "trx;LogFileName=test_results.trx" \
-              --results-directory TestResults \
-              --filter 'FullyQualifiedName~TUnitTestProject.Tests.StringHelperTests | FullyQualifiedName~TUnitTestProject.Tests.BooleanHelperTests | FullyQualifiedName~TUnitTestProject.Tests.MyCalculatorTests'
+         --logger "trx;LogFileName=test_results.trx" \
+         --results-directory TestResults \
+         --filter "FullyQualifiedName~TUnitTestProject.Tests.StringHelperTests \| FullyQualifiedName~TUnitTestProject.Tests.BooleanHelperTests \| FullyQualifiedName~TUnitTestProject.Tests.MyCalculatorTests"
 
       # Step 6: Generate Test Summary
       - name: Generate Test Summary
