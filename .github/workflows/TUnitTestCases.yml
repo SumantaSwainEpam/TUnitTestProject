@@ -24,15 +24,14 @@ jobs:
       - name: Build solution
         run: dotnet build --no-restore --configuration Release
 
-      # ✅ Correct test filter syntax for Microsoft Testing Platform
+      # Run tests with new test runner
       - name: Run TUnit Tests
         run: |
           dotnet test \
             --logger "trx;LogFileName=test_results.trx" \
             --results-directory TestResults \
-            --test-case-filter "(FullyQualifiedName~TUnitTestProject.Tests.StringHelperTests) | (FullyQualifiedName~TUnitTestProject.Tests.BooleanHelperTests) | (FullyQualifiedName~TUnitTestProject.Tests.MyCalculatorTests)"
+            --test-case-filter "FullyQualifiedName~TUnitTestProject.Tests.StringHelperTests OR FullyQualifiedName~TUnitTestProject.Tests.BooleanHelperTests OR FullyQualifiedName~TUnitTestProject.Tests.MyCalculatorTests"
 
-      # Generate summary
       - name: Generate Test Summary
         if: always()
         run: |
