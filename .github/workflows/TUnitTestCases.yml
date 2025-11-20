@@ -31,31 +31,31 @@ jobs:
       # Step 5: Run tests
       - name: Run tests
         run: dotnet test \
-         --logger "trx;LogFileName=test_results.trx" \
-         --results-directory TestResults \
-         --filter "FullyQualifiedName~TUnitTestProject.Tests.StringHelperTests | FullyQualifiedName~TUnitTestProject.Tests.BooleanHelperTest | FullyQualifiedName~TUnitTestProject.Tests.MyCalculatorTest"
+              --logger "trx;LogFileName=test_results.trx" \
+              --results-directory TestResults \
+              --filter 'FullyQualifiedName~TUnitTestProject.Tests.StringHelperTests | FullyQualifiedName~TUnitTestProject.Tests.BooleanHelperTests | FullyQualifiedName~TUnitTestProject.Tests.MyCalculatorTests'
 
-      # ✅ Step 6: Generate Test Summary
+      # Step 6: Generate Test Summary
       - name: Generate Test Summary
         if: always()
+        shell: pwsh
         run: |
-          echo "### 🧪 Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "### 🧪 Test Summary" >> $env:GITHUB_STEP_SUMMARY
 
-          TRX_FILE=$(Get-ChildItem -Path TestResults -Filter "test_results.trx" -Recurse | Select-Object -First 1)
+          $trx = Get-ChildItem -Path TestResults -Filter "test_results.trx" -Recurse | Select-Object -First 1
 
-          if ($TRX_FILE) {
-            $content = Get-Content $TRX_FILE.FullName
-
-            $passed  = ($content | Select-String 'outcome="Passed"' ).Count
-            $failed  = ($content | Select-String 'outcome="Failed"' ).Count
-            $skipped = ($content | Select-String 'outcome="NotExecuted"' ).Count
+          if ($trx) {
+            $content = Get-Content $trx.FullName
+            $passed  = ($content | Select-String 'outcome="Passed"').Count
+            $failed  = ($content | Select-String 'outcome="Failed"').Count
+            $skipped = ($content | Select-String 'outcome="NotExecuted"').Count
             $total = $passed + $failed + $skipped
 
-            echo "- ✅ Passed: $passed"  >> $GITHUB_STEP_SUMMARY
-            echo "- ❌ Failed: $failed"  >> $GITHUB_STEP_SUMMARY
-            echo "- ⚠️ Skipped: $skipped" >> $GITHUB_STEP_SUMMARY
-            echo "- 🧩 Total: $total"    >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Passed: $passed"  >> $env:GITHUB_STEP_SUMMARY
+            echo "- ❌ Failed: $failed"  >> $env:GITHUB_STEP_SUMMARY
+            echo "- ⚠️ Skipped: $skipped" >> $env:GITHUB_STEP_SUMMARY
+            echo "- 🧩 Total: $total"    >> $env:GITHUB_STEP_SUMMARY
           }
           else {
-            echo "- ⚠️ No TRX file found." >> $GITHUB_STEP_SUMMARY
+            echo "- ⚠️ No TRX file found." >> $env:GITHUB_STEP_SUMMARY
           }
