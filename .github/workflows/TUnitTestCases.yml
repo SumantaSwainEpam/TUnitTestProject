@@ -1,0 +1,61 @@
+name: TUnitTestProjectTestCases
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0
+
+      # Step 3: Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore
+
+      # Step 4: Build solution
+      - name: Build solution
+        run: dotnet build --no-restore --configuration Release
+
+      # Step 5: Run tests
+      - name: Run tests
+        run: dotnet test \
+         --logger "trx;LogFileName=test_results.trx" \
+         --results-directory TestResults \
+         --filter "FullyQualifiedName~TUnitTestProject.Tests.StringHelperTests | FullyQualifiedName~TUnitTestProject.Tests.BooleanHelperTest | FullyQualifiedName~TUnitTestProject.Tests.MyCalculatorTest"
+
+      # ✅ Step 6: Generate Test Summary
+      - name: Generate Test Summary
+        if: always()
+        run: |
+          echo "### 🧪 Test Summary" >> $GITHUB_STEP_SUMMARY
+
+          TRX_FILE=$(Get-ChildItem -Path TestResults -Filter "test_results.trx" -Recurse | Select-Object -First 1)
+
+          if ($TRX_FILE) {
+            $content = Get-Content $TRX_FILE.FullName
+
+            $passed  = ($content | Select-String 'outcome="Passed"' ).Count
+            $failed  = ($content | Select-String 'outcome="Failed"' ).Count
+            $skipped = ($content | Select-String 'outcome="NotExecuted"' ).Count
+            $total = $passed + $failed + $skipped
+
+            echo "- ✅ Passed: $passed"  >> $GITHUB_STEP_SUMMARY
+            echo "- ❌ Failed: $failed"  >> $GITHUB_STEP_SUMMARY
+            echo "- ⚠️ Skipped: $skipped" >> $GITHUB_STEP_SUMMARY
+            echo "- 🧩 Total: $total"    >> $GITHUB_STEP_SUMMARY
+          }
+          else {
+            echo "- ⚠️ No TRX file found." >> $GITHUB_STEP_SUMMARY
+          }
