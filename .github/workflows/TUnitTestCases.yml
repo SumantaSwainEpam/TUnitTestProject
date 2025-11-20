@@ -4,39 +4,36 @@ on:
   push:
     branches: [master]
   workflow_dispatch:
-     
+
 jobs:
   build-and-test:
     runs-on: windows-latest
 
     steps:
-      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up .NET
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 8.0
 
-      # Step 3: Restore dependencies
       - name: Restore dependencies
         run: dotnet restore
 
-      # Step 4: Build the solution
       - name: Build solution
         run: dotnet build --no-restore --configuration Release
 
-      # Step 5: Run tests and generate TRX file
       - name: Run tests
         run: |
           dotnet test `
-            --logger "trx;LogFileName=test_results.trx" `
-            --results-directory TestResults `
-            --filter "FullyQualifiedName~TUnitTestProject.Tests.StringHelperTests | FullyQualifiedName~TUnitTestProject.Tests.BooleanHelperTests | FullyQualifiedName~TUnitTestProject.Tests.MyCalculatorTests"
+            --logger:"trx;LogFileName=test_results.trx" `
+            --results-directory:"TestResults" `
+            --filter:"FullyQualifiedName~TUnitTestProject.Tests.StringHelperTests |
+                      FullyQualifiedName~TUnitTestProject.Tests.BooleanHelperTests |
+                      FullyQualifiedName~TUnitTestProject.Tests.MyCalculatorTests"
+        shell: pwsh
 
-      # Step 6: Generate Test Summary
       - name: Publish Test Summary
         uses: dorny/test-reporter@v1
         if: always()
@@ -45,8 +42,6 @@ jobs:
           path: TestResults/**/*.trx
           reporter: dotnet-trx
 
-
-      # Step 7: Upload TRX file for download
       - name: Upload TRX Report
         uses: actions/upload-artifact@v4
         with:
