@@ -10,46 +10,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up .NET
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 8.0
+          dotnet-version: 8.0.x
 
-      # Step 3: Restore dependencies
       - name: Restore dependencies
         run: dotnet restore
 
-      # Step 4: Build solution
       - name: Build solution
         run: dotnet build --no-restore --configuration Release
 
-      # Step 5: Run tests (includes multiple test classes)
-      - name: Run tests
+      # ✅ Correct test filter syntax for Microsoft Testing Platform
+      - name: Run TUnit Tests
         run: |
           dotnet test \
             --logger "trx;LogFileName=test_results.trx" \
             --results-directory TestResults \
-            --filter "(FullyQualifiedName~TUnitTestProject.Tests.StringHelperTests) \| (FullyQualifiedName~TUnitTestProject.Tests.BooleanHelperTests) \| (FullyQualifiedName~TUnitTestProject.Tests.MyCalculatorTests)"
+            --test-case-filter "(FullyQualifiedName~TUnitTestProject.Tests.StringHelperTests) | (FullyQualifiedName~TUnitTestProject.Tests.BooleanHelperTests) | (FullyQualifiedName~TUnitTestProject.Tests.MyCalculatorTests)"
 
-      # Step 6: Generate Test Summary
+      # Generate summary
       - name: Generate Test Summary
         if: always()
         run: |
           echo "### 🧪 Test Summary" >> $GITHUB_STEP_SUMMARY
-
           TRX_FILE=$(find TestResults -name "test_results.trx" | head -1)
-
           if [ -f "$TRX_FILE" ]; then
             PASSED=$(grep -o 'outcome="Passed"' "$TRX_FILE" | wc -l)
             FAILED=$(grep -o 'outcome="Failed"' "$TRX_FILE" | wc -l)
             SKIPPED=$(grep -o 'outcome="NotExecuted"' "$TRX_FILE" | wc -l)
             TOTAL=$((PASSED + FAILED + SKIPPED))
-
             echo "- ✅ Passed: $PASSED"  >> $GITHUB_STEP_SUMMARY
             echo "- ❌ Failed: $FAILED"  >> $GITHUB_STEP_SUMMARY
             echo "- ⚠️ Skipped: $SKIPPED" >> $GITHUB_STEP_SUMMARY
