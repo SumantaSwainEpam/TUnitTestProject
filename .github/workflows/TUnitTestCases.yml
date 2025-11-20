@@ -5,7 +5,6 @@ on:
     branches: [master]
   workflow_dispatch:
      
- 
 jobs:
   build-and-test:
     runs-on: windows-latest
@@ -19,7 +18,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 8.0 # Adjust this to match your project's .NET version
+          dotnet-version: 8.0
 
       # Step 3: Restore dependencies
       - name: Restore dependencies
@@ -29,6 +28,26 @@ jobs:
       - name: Build solution
         run: dotnet build --no-restore --configuration Release
 
-      # Step 5: Run tests
+      # Step 5: Run tests and generate TRX file
       - name: Run tests
-        run: dotnet test --filter "FullyQualifiedName~TUnitTestProject.Tests.StringHelperTests | FullyQualifiedName~TUnitTestProject.Tests.BooleanHelperTests | FullyQualifiedName~TUnitTestProject.Tests.MyCalculatorTests"
+        run: |
+          dotnet test `
+            --logger "trx;LogFileName=test_results.trx" `
+            --results-directory TestResults `
+            --filter "FullyQualifiedName~TUnitTestProject.Tests.StringHelperTests | FullyQualifiedName~TUnitTestProject.Tests.BooleanHelperTests | FullyQualifiedName~TUnitTestProject.Tests.MyCalculatorTests"
+
+      # Step 6: Generate Test Summary
+      - name: Publish Test Summary
+        uses: dorny/test-reporter@v1
+        if: always() # ensures report is generated even on test failure
+        with:
+          name: TUnit Test Results
+          path: TestResults/test_results.trx
+          reporter: dotnet-trx
+
+      # Step 7: Upload TRX file for download
+      - name: Upload TRX Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults
